@@ -1,8 +1,10 @@
 const express = require("express")
+const cors = require('cors');
 const { Payment, MercadoPagoConfig } = require('mercadopago');
 require('dotenv').config();
 const { v4: uuidv4 } = require('uuid');
 const app = express();
+app.use(cors({ origin: 'http://localhost:5173' }));
 app.use(express.json())
 const client = new MercadoPagoConfig({ accessToken: process.env.ACCESS_TOKEN });
 const payment = new Payment(client);
@@ -35,6 +37,8 @@ app.post("/pix", (req, res) => {
 })
 
 app.post("/credit", (req, res) => {
+    console.log("Chegou aqui ihuuuuuuuul")
+    console.log("Body: ", req.body)
     payment.create({
         body: {
             transaction_amount: req.body.transaction_amount,
@@ -53,8 +57,14 @@ app.post("/credit", (req, res) => {
         },
         requestOptions: { idempotencyKey: '<SOME_UNIQUE_VALUE>' }
     })
-        .then((result) => res.json(result))
-        .catch((error) => res.json(error));
+        .then((result) => {
+            console.log("Result: ", result)
+            res.json(result)
+        })
+        .catch((error) => {
+            console.log("Error: ", error)
+            res.json(error)
+        });
 })
 
 app.listen(port, () => {
