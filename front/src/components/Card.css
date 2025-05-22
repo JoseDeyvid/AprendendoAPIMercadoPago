@@ -1,0 +1,14 @@
+.card {
+    border: 3px solid #ccc;
+    cursor: pointer;
+}
+
+.card:hover {
+    background-color: #000;
+    color: #fff;
+}
+
+.selected {
+    background-color: #000;
+    color: #fff;
+}

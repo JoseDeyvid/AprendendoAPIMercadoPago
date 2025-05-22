@@ -1,0 +1,11 @@
+.navbar {
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+}
+
+.navbars a {
+    text-decoration: none;
+    color: #000;
+
+}

@@ -40,3 +40,9 @@
 .read-the-docs {
   color: #888;
 }
+
+ul {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
