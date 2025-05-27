@@ -31,26 +31,29 @@
 // CHAT GPT
 import { useState } from 'react';
 import axios from 'axios';
-
+import { initMercadoPago } from '@mercadopago/sdk-react';
+initMercadoPago(import.meta.env.VITE_PUBLIC_KEY)
 function App() {
   const [qrCode, setQrCode] = useState('');
   // const [checkoutUrl, setCheckoutUrl] = useState('');
 
   const createPreference = async () => {
-    const res = await axios.post('http://localhost:4000/create_preference', {
-      description: 'Camiseta branca',
-      price: 35,
-      quantity: 1
+    const res = await axios.post('http://localhost:4000/create-preference', {
+      title: 'Camiseta branca',
+      unit_price: 35,
+      quantity: 2
     });
     window.location.href = res.data.init_point; // Redireciona para Checkout Pro
   };
 
   const createPix = async () => {
-    const res = await axios.post('http://localhost:4000/create_pix', {
-      description: 'Camiseta branca',
-      price: 35,
-      email: 'cliente@test.com',
-      cpf: '19119119100' // CPF válido de teste
+    const res = await axios.post('http://localhost:4000/create-pix', {
+      transaction_amount: 200,
+      description: "Descrição do produto",
+      paymentMethodId: "pix",
+      email: "email@test.com",
+      identificationType: "CPF",
+      number: "12345678909"
     });
     setQrCode(res.data.qr_code_base64); // Exibe o QR Code PIX
   };
