@@ -28,22 +28,19 @@
 
 
 
-// CHAT GPT
 import { useState } from 'react';
 import axios from 'axios';
-import { initMercadoPago } from '@mercadopago/sdk-react';
-initMercadoPago(import.meta.env.VITE_PUBLIC_KEY)
+// import { initMercadoPago } from '@mercadopago/sdk-react';
+// initMercadoPago(import.meta.env.VITE_PUBLIC_KEY)
 function App() {
   const [qrCode, setQrCode] = useState('');
-  // const [checkoutUrl, setCheckoutUrl] = useState('');
-
   const createPreference = async () => {
     const res = await axios.post('http://localhost:4000/create-preference', {
       title: 'Camiseta branca',
       unit_price: 35,
       quantity: 2
     });
-    window.location.href = res.data.init_point; // Redireciona para Checkout Pro
+    window.location.href = res.data.init_point;
   };
 
   const createPix = async () => {
@@ -55,7 +52,8 @@ function App() {
       identificationType: "CPF",
       number: "12345678909"
     });
-    setQrCode(res.data.qr_code_base64); // Exibe o QR Code PIX
+    console.log(res.data)
+    setQrCode(res.data.qr_code_base64);
   };
 
   return (
