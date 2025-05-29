@@ -1,15 +1,16 @@
 require('dotenv').config()
 const express = require('express');
 const cors = require('cors')
+const axios = require('axios')
 const { v4: uuidv4 } = require('uuid')
 const { MercadoPagoConfig, Preference, Payment } = require('mercadopago')
 const app = express();
 const client = new MercadoPagoConfig({ accessToken: process.env.ACCESS_TOKEN })
 const preference = new Preference(client);
 const payment = new Payment(client);
+const baseUrl = 'https://3b6a-2804-d56-2a0-d400-dd7d-94af-6e27-bbb7.ngrok-free.app'
 app.use(cors());
 app.use(express.json())
-
 app.get('/', (req, res) => {
     res.send('Hello World');
 })
@@ -40,9 +41,9 @@ app.post('/create-preference', (req, res) => {
                     currency_id: 'BRL'
                 }
             ],
-            notification_url: 'https://1f62-2804-d56-290-3b00-24d3-43-d916-99c7.ngrok-free.app/webhook',
+            notification_url: baseUrl+'/webhook',
             back_urls: {
-                success: 'https://5f74-2804-d56-290-3b00-24d3-43-d916-99c7.ngrok-free.app'
+                success: baseUrl
             },
             auto_return: "approved"
         }
@@ -71,7 +72,7 @@ app.post('/create-pix', (req, res) => {
                     number: number
                 }
             },
-            notification_url: 'https://1f62-2804-d56-290-3b00-24d3-43-d916-99c7.ngrok-free.app/webhook',
+            notification_url: baseUrl+'/webhook',
         },
         requestOptions: { idempotencyKey: uuidv4() }
     })
@@ -84,6 +85,89 @@ app.post('/create-pix', (req, res) => {
 
 
 })
+
+app.post('/create-plan', async (req, res) => {
+    try {
+        const response = await axios.post(
+            'https://api.mercadopago.com/preapproval_plan',
+            {
+                reason: 'Academia',
+                auto_recurring: {
+                    frequency: 1,
+                    frequency_type: 'months',
+                    repetitions: 12,
+                    transaction_amount: 70,
+                    currency_id: 'BRL',
+                    
+                },
+                back_url: baseUrl
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+                }
+            }
+        );
+        console.log("Response: ", response.data)
+        res.json(response.data);
+    } catch (error) {
+        console.error("Erro ocorrido: ",error.response.data);
+        res.status(500).send('Erro ao criar plano');
+    }
+});
+
+app.post('/create-subscription', async (req, res) => {
+    try {
+        const response = await axios.post(
+            'https://api.mercadopago.com/preapproval',
+            {
+                preapproval_plan_id: '2c93808497030fc701971ba69a5708df',  // ID do plano
+                payer_email: 'test_user_2105246737@testuser.com',
+                card_token_id: '5c954a350126f4b60d43a6b5243b310a',
+                back_url: baseUrl
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+                }
+            }
+        );
+        console.log("Response subscription: ", response.data)
+        res.json(response.data);
+    } catch (error) {
+        console.error("Erro ocorrido: ",error.response.data);
+        res.status(500).send('Erro ao criar assinatura');
+    }
+});
+
+app.post('/create-direct-subscription', async (req, res) => {
+    try {
+        const response = await axios.post(
+            'https://api.mercadopago.com/preapproval',
+            {
+                reason: "Assinatura Anual",
+                auto_recurring: {
+                    frequency: 12,
+                    frequency_type: "months",
+                    transaction_amount: 200,
+                    currency_id: "BRL",
+                },
+                payer_email: "test_user_2105246737@testuser.com",
+                back_url: baseUrl
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+                }
+            }
+        );
+        console.log("Response direct subscription: ", response.data)
+        res.json(response.data);
+    } catch (error) {
+        console.error("Erro ocorrido: ", error.response.data);
+        res.status(500).send('Erro na assinatura direta');
+    }
+});
 
 
 app.listen(4000, console.log("Rodando na porta 4000"));
